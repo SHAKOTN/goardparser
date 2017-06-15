@@ -52,7 +52,6 @@ func parseDataHandler(w http.ResponseWriter, r *http.Request){
 		sendErrorMessage(w, "Could not decode the request body as JSON", http.StatusBadRequest)
 		return
 	}
-
 	if td.Text == ""  {
 		sendErrorMessage(
 			w,
