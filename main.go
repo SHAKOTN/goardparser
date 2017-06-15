@@ -9,5 +9,8 @@ import (
 func main() {
 	r := MakeRouter()
 	http.Handle("/", r)
-	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+
+	http.ListenAndServe(
+		":"+os.Getenv("PORT"),
+		nil)
 }
