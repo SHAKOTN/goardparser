@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"log"
 	"io/ioutil"
+	"strings"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request)  {
@@ -30,11 +31,20 @@ func ParseDataHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	if validators.IsValidRequestParams(w, td) {
-		data := parseThread(td.Data)
+
+		ch := make(chan *structs.Result)
+		go parseThread(td.Data, ch)
+		data :=  <-ch
+
 		responseJson := &structs.ResponseJSON{}
+
 		for _, item := range data.Threads[0].Posts {
+
 			for _, file := range item.Files{
-				responseJson.Files = append(responseJson.Files, file)
+
+				if strings.Contains(file.Name, ".webm"){
+					responseJson.Files = append(responseJson.Files, file)
+				}
 			}
 		}
 		utils.JSONResponse(w, responseJson)
@@ -42,7 +52,7 @@ func ParseDataHandler(w http.ResponseWriter, r *http.Request){
 
 }
 
-func parseThread(url string) *structs.Result{
+func parseThread(url string, ch chan *structs.Result) {
 	log.Printf("Making request to: %v", url)
 	res, err := http.Get(url)
 
@@ -59,6 +69,6 @@ func parseThread(url string) *structs.Result{
 	result := &structs.Result{}
 	json.Unmarshal(body, result)
 
-	return result
+	ch <- result
 
 }
