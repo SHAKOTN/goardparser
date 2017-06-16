@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 )
 
-
 func IndexHandler(w http.ResponseWriter, r *http.Request)  {
 	stuff := "Hello goardparser!"
 	utils.JSONResponse(w, structs.GenericJSON{Stuff: stuff})
@@ -30,5 +29,36 @@ func ParseDataHandler(w http.ResponseWriter, r *http.Request){
 		errors.SendErrorMessage(w, "Could not decode the request body as JSON", http.StatusBadRequest)
 		return
 	}
-	validators.ValidateParseHandlerParams(w, td)
+	if validators.IsValidRequestParams(w, td) {
+		data := parseThread(td.Data)
+		responseJson := &structs.ResponseJSON{}
+		for _, item := range data.Threads[0].Posts {
+			for _, file := range item.Files{
+				responseJson.Files = append(responseJson.Files, file)
+			}
+		}
+		utils.JSONResponse(w, responseJson)
+	}
+
+}
+
+func parseThread(url string) *structs.Result{
+	log.Printf("Making request to: %v", url)
+	res, err := http.Get(url)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	result := &structs.Result{}
+	json.Unmarshal(body, result)
+
+	return result
+
 }
