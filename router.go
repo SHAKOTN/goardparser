@@ -3,25 +3,26 @@ package main
 import (
 	"github.com/gorilla/mux"
 	"net/http"
+	"goardparser/handlers"
 )
 
 func MakeRouter() *mux.Router {
 
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 
-	r.HandleFunc("/", wrapHandler(indexHandler)).Methods("GET")
-	r.HandleFunc("/parse_data", wrapHandler(parseDataHandler)).Methods("POST")
+	router.HandleFunc("/", wrapHandler(handlers.IndexHandler)).Methods("GET")
+	router.HandleFunc("/parse_data", wrapHandler(handlers.ParseDataHandler)).Methods("POST")
 
-	return r
+	return router
 }
 
 func wrapHandler(
 	handler func(w http.ResponseWriter, r *http.Request),
 ) func(w http.ResponseWriter, r *http.Request) {
 
-	h := func(w http.ResponseWriter, r *http.Request) {
+	inner_handler := func(w http.ResponseWriter, r *http.Request) {
 
 		handler(w, r)
 	}
-	return h
+	return inner_handler
 }

@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"goardparser/structs"
@@ -12,12 +12,12 @@ import (
 )
 
 
-func indexHandler(w http.ResponseWriter, r *http.Request)  {
+func IndexHandler(w http.ResponseWriter, r *http.Request)  {
 	stuff := "Hello goardparser!"
 	utils.JSONResponse(w, structs.GenericJSON{Stuff: stuff})
 }
 
-func parseDataHandler(w http.ResponseWriter, r *http.Request){
+func ParseDataHandler(w http.ResponseWriter, r *http.Request){
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Failed to read the request body: %v", err)
