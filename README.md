@@ -29,6 +29,6 @@ Response:
             "path": "....webm",
             "thumbnail": "....jpg"
         },
-        ...
+        
 }
 ```
