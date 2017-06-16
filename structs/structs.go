@@ -15,6 +15,7 @@ type ResponseJSON struct {
 
 type Result struct {
 	Threads []Thread
+	Error error
 }
 
 type Thread struct {

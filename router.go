@@ -21,7 +21,6 @@ func wrapHandler(
 ) func(w http.ResponseWriter, r *http.Request) {
 
 	inner_handler := func(w http.ResponseWriter, r *http.Request) {
-
 		handler(w, r)
 	}
 	return inner_handler

@@ -27,14 +27,24 @@ func ParseDataHandler(w http.ResponseWriter, r *http.Request){
 	var td structs.RequestDataJSON
 
 	if err := json.Unmarshal(body, &td); err != nil {
-		errors.SendErrorMessage(w, "Could not decode the request body as JSON", http.StatusBadRequest)
+		errors.SendErrorMessage(w,
+			"Could not decode the request body as JSON",
+			http.StatusBadRequest)
 		return
 	}
 	if validators.IsValidRequestParams(w, td) {
 
 		ch := make(chan *structs.Result)
-		go parseThread(td.Data, ch)
+		go utils.ParseThread(td.Data, ch)
+
 		data :=  <-ch
+
+		if data.Error != nil {
+			errors.SendErrorMessage(w,
+				"Thread does not exist",
+				http.StatusBadRequest)
+			return
+		}
 
 		responseJson := &structs.ResponseJSON{}
 
@@ -49,26 +59,4 @@ func ParseDataHandler(w http.ResponseWriter, r *http.Request){
 		}
 		utils.JSONResponse(w, responseJson)
 	}
-
-}
-
-func parseThread(url string, ch chan *structs.Result) {
-	log.Printf("Making request to: %v", url)
-	res, err := http.Get(url)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	result := &structs.Result{}
-	json.Unmarshal(body, result)
-
-	ch <- result
-
 }
