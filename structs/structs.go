@@ -10,10 +10,10 @@ type RequestDataJSON struct {
 }
 
 type ResponseJSON struct {
-	Files []File
+	Files []File `json:"files"`
 }
 
-type Result struct {
+type Board struct {
 	Threads []Thread
 	Error error
 }

@@ -12,35 +12,36 @@ import (
 	"strings"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request)  {
+func IndexHandler(writer http.ResponseWriter, r *http.Request)  {
 	stuff := "Hello goardparser!"
-	utils.JSONResponse(w, structs.GenericJSON{Stuff: stuff})
+	utils.JSONResponse(writer, structs.GenericJSON{Stuff: stuff})
 }
 
-func ParseDataHandler(w http.ResponseWriter, r *http.Request){
+func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Failed to read the request body: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	var td structs.RequestDataJSON
+	var requestData structs.RequestDataJSON
 
-	if err := json.Unmarshal(body, &td); err != nil {
-		errors.SendErrorMessage(w,
+	if err := json.Unmarshal(body, &requestData); err != nil {
+		errors.SendErrorMessage(writer,
 			"Could not decode the request body as JSON",
 			http.StatusBadRequest)
 		return
 	}
-	if validators.IsValidRequestParams(w, td) {
 
-		ch := make(chan *structs.Result)
-		go utils.ParseThread(td.Data, ch)
+	if validators.IsValidRequestParams(writer, requestData) {
 
-		data :=  <-ch
+		channel := make(chan *structs.Board)
+		go utils.ParseThread(requestData.Data, channel)
+
+		data :=  <-channel
 
 		if data.Error != nil {
-			errors.SendErrorMessage(w,
+			errors.SendErrorMessage(writer,
 				"Thread does not exist",
 				http.StatusBadRequest)
 			return
@@ -48,15 +49,15 @@ func ParseDataHandler(w http.ResponseWriter, r *http.Request){
 
 		responseJson := &structs.ResponseJSON{}
 
-		for _, item := range data.Threads[0].Posts {
+		for _, post := range data.Threads[0].Posts {
 
-			for _, file := range item.Files{
+			for _, file := range post.Files{
 
 				if strings.Contains(file.Name, ".webm"){
 					responseJson.Files = append(responseJson.Files, file)
 				}
 			}
 		}
-		utils.JSONResponse(w, responseJson)
+		utils.JSONResponse(writer, responseJson)
 	}
 }

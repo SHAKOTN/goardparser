@@ -9,24 +9,25 @@ import (
 	"errors"
 )
 
-func JSONResponse(w http.ResponseWriter, data interface{}) {
+func JSONResponse(writer http.ResponseWriter, data interface{}) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		log.Printf("Failed to encode a JSON response: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(body)
+	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	writer.WriteHeader(http.StatusOK)
+	_, err = writer.Write(body)
 	if err != nil {
 		log.Printf("Failed to write the response body: %v", err)
 		return
 	}
 }
 
-func ParseThread(url string, ch chan *structs.Result) {
+
+func ParseThread(url string, ch chan *structs.Board) {
 	log.Printf("Making request to: %v", url)
 	res, err := http.Get(url)
 
@@ -39,7 +40,7 @@ func ParseThread(url string, ch chan *structs.Result) {
 		errorStr := string(b)
 		log.Printf("Cannot obtain thread")
 
-		result := &structs.Result{}
+		result := &structs.Board{}
 		result.Error = errors.New(errorStr)
 
 		ch <- result
@@ -50,11 +51,9 @@ func ParseThread(url string, ch chan *structs.Result) {
 			log.Print(err)
 		}
 
-		result := &structs.Result{}
+		result := &structs.Board{}
 		json.Unmarshal(body, result)
 
 		ch <- result
 	}
-
-
 }
