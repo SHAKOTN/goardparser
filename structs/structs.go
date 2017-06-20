@@ -5,6 +5,10 @@ type GenericJSON struct {
 	Stuff string `json:"some_stuff"`
 }
 
+type ErrorMsg struct {
+	Msg string `json:"error"`
+}
+
 type RequestDataJSON struct {
 	Data string `json:"thread_link"`
 }

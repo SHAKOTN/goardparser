@@ -3,23 +3,23 @@ package validators
 import (
 	"net/http"
 	"goardparser/structs"
-	"goardparser/errors"
+	"goardparser/utils"
 	"strings"
 )
 
 func IsValidRequestParams(w http.ResponseWriter, st structs.RequestDataJSON) bool{
 	if st.Data == ""  {
-		errors.SendErrorMessage(
+		utils.JSONResponse(
 			w,
-			"Required parameter {thread_link} is missing",
+			structs.ErrorMsg{Msg: "Required parameter {thread_link} is missing"},
 			http.StatusBadRequest)
 		return false
 	}
 
 	if !strings.Contains(st.Data, "https://2ch.hk/"){
-		errors.SendErrorMessage(
+		utils.JSONResponse(
 			w,
-			"The link is invalid. You should use http(s)://link-to-image-board",
+			structs.ErrorMsg{Msg: "Required parameter {thread_link} is missing"},
 			http.StatusNotAcceptable)
 		return false
 	}

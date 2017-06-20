@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"goardparser/structs"
-	"goardparser/errors"
 	"goardparser/validators"
 	"goardparser/utils"
 	"net/http"
@@ -14,7 +13,7 @@ import (
 
 func IndexHandler(writer http.ResponseWriter, r *http.Request)  {
 	stuff := "Hello goardparser!"
-	utils.JSONResponse(writer, structs.GenericJSON{Stuff: stuff})
+	utils.JSONResponse(writer, structs.GenericJSON{Stuff: stuff}, http.StatusOK)
 }
 
 func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
@@ -27,8 +26,8 @@ func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 	var requestData structs.RequestDataJSON
 
 	if err := json.Unmarshal(body, &requestData); err != nil {
-		errors.SendErrorMessage(writer,
-			"Could not decode the request body as JSON",
+		utils.JSONResponse(writer,
+			structs.ErrorMsg{Msg: "Could not decode the request body as JSON"},
 			http.StatusBadRequest)
 		return
 	}
@@ -41,8 +40,8 @@ func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 		data :=  <-channel
 
 		if data.Error != nil {
-			errors.SendErrorMessage(writer,
-				"Thread does not exist",
+			utils.JSONResponse(writer,
+				structs.ErrorMsg{Msg: "Thread does not exist"},
 				http.StatusBadRequest)
 			return
 		}
@@ -58,6 +57,6 @@ func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 				}
 			}
 		}
-		utils.JSONResponse(writer, responseJson)
+		utils.JSONResponse(writer, responseJson, http.StatusOK)
 	}
 }

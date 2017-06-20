@@ -9,7 +9,7 @@ import (
 	"errors"
 )
 
-func JSONResponse(writer http.ResponseWriter, data interface{}) {
+func JSONResponse(writer http.ResponseWriter, data interface{}, status int) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		log.Printf("Failed to encode a JSON response: %v", err)
@@ -18,7 +18,7 @@ func JSONResponse(writer http.ResponseWriter, data interface{}) {
 	}
 
 	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	writer.WriteHeader(http.StatusOK)
+	writer.WriteHeader(status)
 	_, err = writer.Write(body)
 	if err != nil {
 		log.Printf("Failed to write the response body: %v", err)
