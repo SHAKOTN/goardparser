@@ -9,6 +9,7 @@ import (
 	"log"
 	"io/ioutil"
 	"strings"
+	"fmt"
 )
 
 func IndexHandler(writer http.ResponseWriter, r *http.Request)  {
@@ -39,13 +40,13 @@ func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 
 		data :=  <-channel
 
-		if data.Error != nil {
+		if data.Error != nil || len(data.Threads) == 0{
 			utils.JSONResponse(writer,
-				structs.ErrorMsg{Msg: "Thread does not exist"},
+				structs.ErrorMsg{Msg: "Thread does not exist or it is empty"},
 				http.StatusBadRequest)
 			return
 		}
-
+		fmt.Println(data.Threads)
 		responseJson := &structs.ResponseJSON{}
 
 		for _, post := range data.Threads[0].Posts {

@@ -7,6 +7,7 @@ import (
 	"goardparser/structs"
 	"io/ioutil"
 	"errors"
+	"strings"
 )
 
 func JSONResponse(writer http.ResponseWriter, data interface{}, status int) {
@@ -29,7 +30,9 @@ func JSONResponse(writer http.ResponseWriter, data interface{}, status int) {
 
 func ParseThread(url string, ch chan *structs.Board) {
 	log.Printf("Making request to: %v", url)
-	res, err := http.Get(url)
+
+	Request := Request{Path: strings.Replace(url, ".html", ".json", -1)}
+	res, err := Request.Get()
 
 	if err != nil {
 		log.Print(err)
