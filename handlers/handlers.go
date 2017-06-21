@@ -46,7 +46,6 @@ func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 				http.StatusBadRequest)
 			return
 		}
-		fmt.Println(data.Threads)
 		responseJson := &structs.ResponseJSON{}
 
 		for _, post := range data.Threads[0].Posts {
