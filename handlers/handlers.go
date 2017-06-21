@@ -9,7 +9,6 @@ import (
 	"log"
 	"io/ioutil"
 	"strings"
-	"fmt"
 )
 
 func IndexHandler(writer http.ResponseWriter, r *http.Request)  {
