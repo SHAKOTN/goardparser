@@ -11,7 +11,9 @@ func main() {
 	r := MakeRouter()
 	http.Handle("/", r)
 
-	handler := cors.Default().Handler(r)
+	handler := cors.New(cors.Options{
+		AllowedOrigins: []string{"https://goardparcerface.herokuapp.com"},
+	}).Handler(r)
 
 	http.ListenAndServe(
 		":"+os.Getenv("PORT"),
