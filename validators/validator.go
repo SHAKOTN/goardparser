@@ -19,10 +19,9 @@ func (v *Validator) IsValidRequestParams(w http.ResponseWriter, st structs.Reque
 			http.StatusBadRequest)
 		return false
 	}
-	if strings.Contains(st.Data, "https://2ch.hk/") {
+	if strings.HasPrefix(st.Data, "https://2ch.hk/") {
 		v.Origin = "https://2ch.hk"
-	// TODO: implement and test it
-	} else if strings.Contains(st.Data, "http://www.4chan.org/") {
+	} else if strings.HasPrefix(st.Data, "http://www.4chan.org/") {
 		v.Origin = "http://www.4chan.org"
 	} else {
 		utils.JSONResponse(
