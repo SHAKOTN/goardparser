@@ -37,3 +37,8 @@ type File struct {
 	Path string `json:"path"`
 	Thumbnail string `json:"thumbnail"`
 }
+
+func(file *File) NormalizeSrcPath(brd_url string){
+	file.Path = brd_url + file.Path
+	file.Thumbnail = brd_url + file.Thumbnail
+}

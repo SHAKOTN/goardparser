@@ -31,8 +31,8 @@ func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 			http.StatusBadRequest)
 		return
 	}
-
-	if validators.IsValidRequestParams(writer, requestData) {
+	validator := validators.Validator{}
+	if validator.IsValidRequestParams(writer, requestData) {
 
 		channel := make(chan *structs.Board)
 		go utils.ParseThread(requestData.Data, channel)
@@ -52,6 +52,7 @@ func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 			for _, file := range post.Files{
 
 				if strings.Contains(file.Name, ".webm"){
+					file.NormalizeSrcPath(validator.Origin)
 					responseJson.Files = append(responseJson.Files, file)
 				}
 			}
