@@ -11,6 +11,7 @@ import (
 	"strings"
 	"os"
 	"io"
+	"path/filepath"
 )
 
 func IndexHandler(writer http.ResponseWriter, r *http.Request)  {
@@ -79,15 +80,28 @@ func DownloadDataHandler(writer http.ResponseWriter, request *http.Request) {
 			http.StatusBadRequest)
 		return
 	}
+	if len(requestData.Files) > 50 {
+		utils.JSONResponse(writer,
+			structs.ErrorMsg{Msg: "Too many files to download"},
+			http.StatusBadRequest)
+		return
+	}
+	path := "tmp/"
+	err = os.MkdirAll(path, os.FileMode(0777))
 
+	if err != nil {
+		log.Println("Error creating directory")
+		log.Println(err)
+		return
+	}
 	var tasks []*utils.Task
 
 	for _, file := range requestData.Files {
-		var fileName = file.Name
+		var fileName = filepath.Join(path, file.Name)
 		var filePath = file.Path
 
 		tasks = append(tasks, utils.NewTask(func() error {
-			log.Printf("Running %v", fileName)
+			log.Printf("Downloading %v", fileName)
 			out, err := os.Create(fileName)
 			if err != nil{
 				log.Printf("Can't create file")
@@ -99,10 +113,10 @@ func DownloadDataHandler(writer http.ResponseWriter, request *http.Request) {
 			}
 			defer resp.Body.Close()
 
-			s, err := io.Copy(out, resp.Body)
+			_, err = io.Copy(out, resp.Body)
 
 			if err != nil{
-				log.Printf("Can't download file %v", err)
+				log.Print(err)
 			}
 			return err
 		}))
@@ -114,7 +128,6 @@ func DownloadDataHandler(writer http.ResponseWriter, request *http.Request) {
 func runTasks(tasks []*utils.Task) bool {
 	p := utils.NewPool(tasks, 50)
 	p.Run()
-	log.Print("Hello")
 	var numErrors int
 	for _, task := range p.Tasks {
 		if task.Err != nil {
