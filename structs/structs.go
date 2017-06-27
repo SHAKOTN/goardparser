@@ -27,7 +27,7 @@ type Thread struct {
 }
 
 type InnerPost struct {
-	Files []File
+	Files []File `json:"files"`
 }
 
 type File struct {

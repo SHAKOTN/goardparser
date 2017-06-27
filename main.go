@@ -4,10 +4,12 @@ import (
 	"net/http"
 	"os"
 	"github.com/rs/cors"
+	"runtime"
 )
 
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	r := MakeRouter()
 	http.Handle("/", r)
 

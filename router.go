@@ -12,6 +12,7 @@ func MakeRouter() *mux.Router {
 
 	router.HandleFunc("/", wrapHandler(handlers.IndexHandler)).Methods("GET")
 	router.HandleFunc("/parse_data", wrapHandler(handlers.ParseDataHandler)).Methods("POST")
+	router.HandleFunc("/download", wrapHandler(handlers.DownloadDataHandler)).Methods("POST")
 
 	return router
 }
