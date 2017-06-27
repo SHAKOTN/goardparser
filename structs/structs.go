@@ -27,8 +27,6 @@ type Thread struct {
 }
 
 type InnerPost struct {
-	Banned int `json:"banned"`
-	Comment string `json:"comment"`
 	Files []File
 }
 
