@@ -20,18 +20,22 @@ func IndexHandler(writer http.ResponseWriter, r *http.Request)  {
 }
 
 func ParseDataHandler(writer http.ResponseWriter, request *http.Request){
+
 	body, err := ioutil.ReadAll(request.Body)
+
 	if err != nil {
 		log.Printf("Failed to read the request body: %v", err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	var requestData structs.RequestDataJSON
 
 	if err := json.Unmarshal(body, &requestData); err != nil {
 		utils.JSONResponse(writer,
 			structs.ErrorMsg{Msg: "Could not decode the request body as JSON"},
 			http.StatusBadRequest)
+
 		return
 	}
 	validator := validators.Validator{}
@@ -43,7 +47,9 @@ func ParseDataHandler(writer http.ResponseWriter, request *http.Request){
 		if data.Error != nil || len(data.Threads) == 0{
 			utils.JSONResponse(writer,
 				structs.ErrorMsg{Msg: "Thread does not exist or it is empty"},
-				http.StatusBadRequest)
+				http.StatusBadRequest,
+			)
+
 			return
 		}
 		responseJson := &structs.ResponseJSON{}
@@ -65,6 +71,7 @@ func ParseDataHandler(writer http.ResponseWriter, request *http.Request){
 
 
 func DownloadDataHandler(writer http.ResponseWriter, request *http.Request) {
+
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		log.Printf("Failed to read the request body: %v", err)
@@ -77,52 +84,72 @@ func DownloadDataHandler(writer http.ResponseWriter, request *http.Request) {
 	if err := json.Unmarshal(body, &requestData); err != nil {
 		utils.JSONResponse(writer,
 			structs.ErrorMsg{Msg: "Could not decode the request body as JSON"},
-			http.StatusBadRequest)
+			http.StatusBadRequest,
+
+		)
+
 		return
 	}
 	if len(requestData.Files) > 50 {
-		utils.JSONResponse(writer,
+		utils.JSONResponse(
+			writer,
 			structs.ErrorMsg{Msg: "Too many files to download"},
-			http.StatusBadRequest)
+			http.StatusBadRequest,
+		)
+
 		return
 	}
-	path := "tmp/"
-	err = os.MkdirAll(path, os.FileMode(0777))
+	// Using here random directory name to avoid collisions
+	path := utils.RandomString(6)
 
+	err = os.MkdirAll(path, os.FileMode(0777))
 	if err != nil {
 		log.Println("Error creating directory")
 		log.Println(err)
 		return
 	}
+
 	var tasks []*utils.Task
 
+	// Add all tasks to WorkerPool queue
 	for _, file := range requestData.Files {
+
 		var fileName = filepath.Join(path, file.Name)
 		var filePath = file.Path
 
 		tasks = append(tasks, utils.NewTask(func() error {
 			log.Printf("Downloading %v", fileName)
+
 			out, err := os.Create(fileName)
 			if err != nil{
 				log.Printf("Can't create file")
 			}
+
 			defer out.Close()
+
 			resp, err := http.Get(filePath)
 			if err != nil{
 				log.Printf("Can't download file")
 			}
+
 			defer resp.Body.Close()
 
 			_, err = io.Copy(out, resp.Body)
-
 			if err != nil{
 				log.Print(err)
 			}
+
 			return err
 		}))
 	}
 
 	runTasks(tasks)
+
+	err = utils.CreateZip(path + "/", path + ".zip")
+
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func runTasks(tasks []*utils.Task) bool {
@@ -131,7 +158,6 @@ func runTasks(tasks []*utils.Task) bool {
 	var numErrors int
 	for _, task := range p.Tasks {
 		if task.Err != nil {
-			log.Print(task.Err)
 			numErrors++
 		}
 		if numErrors >= 10 {
