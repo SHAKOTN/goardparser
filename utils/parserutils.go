@@ -28,7 +28,7 @@ func JSONResponse(writer http.ResponseWriter, data interface{}, status int) {
 }
 
 
-func ParseThread(url string, ch chan *structs.Board) {
+func ParseThread(url string) *structs.Board{
 	log.Printf("Making request to: %v", url)
 
 	Request := Request{Path: strings.Replace(url, ".html", ".json", -1)}
@@ -37,16 +37,14 @@ func ParseThread(url string, ch chan *structs.Board) {
 	if err != nil {
 		log.Print(err)
 	}
-
+	result := &structs.Board{}
 	if res.StatusCode != 200 {
 		b, _ := ioutil.ReadAll(res.Body)
 		errorStr := string(b)
 		log.Printf("Cannot obtain thread")
 
-		result := &structs.Board{}
-		result.Error = errors.New(errorStr)
 
-		ch <- result
+		result.Error = errors.New(errorStr)
 
 	} else {
 		body, err := ioutil.ReadAll(res.Body)
@@ -54,9 +52,7 @@ func ParseThread(url string, ch chan *structs.Board) {
 			log.Print(err)
 		}
 
-		result := &structs.Board{}
 		json.Unmarshal(body, result)
-
-		ch <- result
 	}
+	return result
 }

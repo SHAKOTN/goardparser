@@ -35,10 +35,7 @@ func ParseDataHandler(writer http.ResponseWriter, r *http.Request){
 	
 	if validator.IsValidRequestParams(writer, requestData) {
 
-		channel := make(chan *structs.Board)
-		go utils.ParseThread(requestData.Data, channel)
-
-		data :=  <-channel
+		data := utils.ParseThread(requestData.Data)
 
 		if data.Error != nil || len(data.Threads) == 0{
 			utils.JSONResponse(writer,
