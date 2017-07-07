@@ -150,6 +150,18 @@ func DownloadDataHandler(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Print(err)
 	}
+	writer.Header().Set("Content-Disposition", "attachment")
+	writer.Header().Set("Content-Type", "application/zip")
+
+	zipReader, err := os.Open(path + ".zip")
+
+	defer zipReader.Close()
+
+	// Remove all files and archives after downloading
+	defer utils.Clean(path)
+
+	io.Copy(writer, zipReader)
+
 }
 
 func runTasks(tasks []*utils.Task) bool {
